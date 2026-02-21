@@ -1,35 +1,62 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from "react";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [plants, setPlants] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Fetch plants when component loads
+  useEffect(() => {
+    fetch("http://localhost:3000/plants")
+      .then((res) => res.json())
+      .then((data) => setPlants(data))
+      .catch((error) => console.error("Error fetching plants:", error));
+  }, []);
+
+  // Toggle stock status (non-persisting)
+  const handleToggleStock = (id) => {
+    const updatedPlants = plants.map((plant) =>
+      plant.id === id
+        ? { ...plant, inStock: !plant.inStock }
+        : plant
+    );
+    setPlants(updatedPlants);
+  };
+
+  // Filter plants based on search
+  const filteredPlants = plants.filter((plant) =>
+    plant.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div>
+      <h1>Plant Shop 🌱</h1>
+
+      {/* Search Input */}
+      <form>
+        <input
+          type="text"
+          placeholder="Search plants..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </form>
+
+      {/* Plant List */}
+      <div className="plant-list">
+        {filteredPlants.map((plant) => (
+          <div key={plant.id} className="plant-card">
+            <img src={plant.image} alt={plant.name} width="200" />
+            <h3>{plant.name}</h3>
+            <p>${plant.price}</p>
+
+            <button onClick={() => handleToggleStock(plant.id)}>
+              {plant.inStock ? "In Stock" : "Out of Stock"}
+            </button>
+          </div>
+        ))}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
