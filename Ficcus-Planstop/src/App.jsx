@@ -6,7 +6,7 @@ function App() {
 
   // Fetch plants when component loads
   useEffect(() => {
-    fetch("http://localhost:3000/plants")
+    fetch("http://localhost:5000/plants")
       .then((res) => res.json())
       .then((data) => setPlants(data))
       .catch((error) => console.error("Error fetching plants:", error));
